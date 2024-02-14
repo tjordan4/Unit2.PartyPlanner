@@ -9,6 +9,9 @@ let events = [];
 
 const eventContainer = document.getElementById('events')
 
+const form = document.querySelector('.form')
+
+form.addEventListener('submit', addEvent)
 // Fetch
 
 async function getEvents() {
@@ -22,39 +25,33 @@ async function getEvents() {
     }
 }
 
+async function addEvent(event){
+    event.preventDefault();
+    try {
+        const response = await fetch(`${BASE_URL}/events`, {
+            method: 'POST',
+            headers:{ 'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                name: form.name.value,
+                location: form.location.value,
+                date: new Date(form.date.value).toISOString(),
+                description: form.description.value
+            })
+        })
+        events = await getEvents();
+        renderEvents ()
+    }   catch (err) {
+        console.error(err);
+    }
+}
+
 //Events Lisenters
-// const form = document.getElementById('form');
-// form.addEventListener('submit', async (event) =>{
-//     event.preventDefault();
 
-//     const formData = form.element 
-
-//     let {name, date, location, description} = formData
-
-//     const newEvent = {
-//         name: name.value,
-//         date: date.value,
-//         location: location.value,
-//         description: description.value
-//     }
-
-//     const response = await fetch(`${BASE_URL}/events/${id.value}` ,{
-//         method: 'PUSH',
-//         headers: {
-//             "Content-Type": "application/json",
-//         },
-//         body: JSON.strongify(newEvent),
-//     });
-
-//     const json = await response.json();
-
-//     events = await getEvents()
-//     renderEvents()
-// })
 
 
 // Render Functions
 function renderEvents (){
+
     const htmlEvents = events.map(evt => {
         let div = document.createElement("div");
 
@@ -64,11 +61,26 @@ function renderEvents (){
                         <p>${evt.date}</p>
                         <p>${evt.location}</p>
                         <p>${evt.description}</p>`;
-
+        let button = document.createElement("button")
+        button.innerText = "Delete"
+        button.addEventListener('click', ()=> deleteEvent(evt.id))
+        div.appendChild(button)
         return div;
     })
 
     eventContainer.replaceChildren(...htmlEvents)
+}
+
+async function deleteEvent(){
+    try{
+        const del = await fetch(`${BASE_URL}/events/id`, {
+            method: 'DELETE'
+        })
+        events = await getEvents();
+        renderEvents();
+    } catch (err) {
+        console.error(err)
+    }
 }
 
 async function startApp(){
