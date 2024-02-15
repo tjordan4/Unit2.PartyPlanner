@@ -71,9 +71,9 @@ function renderEvents (){
     eventContainer.replaceChildren(...htmlEvents)
 }
 
-async function deleteEvent(){
+async function deleteEvent(id){
     try{
-        const del = await fetch(`${BASE_URL}/events/id`, {
+        const del = await fetch(`${BASE_URL}/events/${id}`, {
             method: 'DELETE'
         })
         events = await getEvents();
